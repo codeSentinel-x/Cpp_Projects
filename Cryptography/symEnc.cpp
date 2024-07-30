@@ -25,7 +25,7 @@ void _encrypt(const string& filePath, int key){
     outputFile.close();
 }
 
-void _d(const string& filePath, int key){
+void _decrypt(const string& filePath, int key){
 
     ifstream inputFile(filePath);
     vector<char> charVector;
@@ -43,14 +43,14 @@ void _d(const string& filePath, int key){
     outputFile.close();
 }
 
-void _ap(string& path){
+void _askForPath(string& path){
 
     cout << "Please enter path to input file of operation\n";
     cin >> path;
 
 }
 
-void _ak(int& key){
+void _askForKey(int& key){
 
     cout << "Please enter the key\n";
     cin >> key;
@@ -71,15 +71,15 @@ int main(){
         switch (opt){
             case 1:
 
-                _ap(filePath);
-                _ak(key);
-                _d(filePath, key);
+                _askForPath(filePath);
+                _askForKey(key);
+                _decrypt(filePath, key);
                 break;
 
             case 2:
 
-                _ap(filePath);
-                _ak(key);
+                _askForPath(filePath);
+                _askForKey(key);
                 _encrypt(filePath, key);
                 break;
 
@@ -93,11 +93,11 @@ int main(){
                 cout << "Do you want to use different key for every one(0 = false, 1 = true)\n";
                 cin >> b3;
 
-                if (b3) _ak(key);
+                if (b3) _askForKey(key);
 
                 for (int i{ 0 }; i < a3; i++){
-                    _ap(filePath);
-                    if (!b3) _ak(key);
+                    _askForPath(filePath);
+                    if (!b3) _askForKey(key);
                 }
                 break;
 
@@ -111,10 +111,10 @@ int main(){
                 cout << "Do you want to use different key for every one(0 = false, 1 = true)\n";
                 cin >> b4;
 
-                if (b4) _ak(key);
+                if (b4) _askForKey(key);
                 for (int i{ 0 }; i < a4; i++){
-                    _ap(filePath);
-                    if (!b4) _ak(key);
+                    _askForPath(filePath);
+                    if (!b4) _askForKey(key);
                 }
 
                 break;
