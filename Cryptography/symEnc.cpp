@@ -6,7 +6,6 @@
 
 using std::ifstream, std::ofstream, std::string, std::cout, std::cin, std::vector, std::ios;
 
-
 void _encrypt(const string& filePath, int key){
 
     ifstream inputFile(filePath);
