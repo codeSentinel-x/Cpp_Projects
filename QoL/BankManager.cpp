@@ -29,7 +29,7 @@ class BankAccount{
             std::ofstream fileO(filePath);
             if (!fileO) std::cerr << "Write new user output file error : Unable to open file " << filePath << "\n";
             for (string l : lines) fileO << l << "\n";
-            fileO << "Name:" << name << "\n";
+            fileO << "Name:" << name << ";\n";
             fileO << "Password:" << password << "\n";
             fileO << balance << "\n";
             fileO << "Status:normie" << "\n";
@@ -44,7 +44,7 @@ class BankAccount{
             vector<string> lines;
             while (getline(fileI, line)){
                 lines.push_back(line);
-                if (line.find("Name:" + name) != string::npos){
+                if (line.find("Name:" + name + ";") != string::npos){
                     lineNumber = lineCounter;
                 }
                 lineCounter++;
@@ -71,7 +71,7 @@ class BankAccount{
             string line;
             int i(-10);
             while (getline(file, line)){
-                if (line.find("Name:" +name) != string::npos){
+                if (line.find("Name:" + name + ";") != string::npos){
                     name = line.erase(0, 5);
                     i = 2;
                 } else if (i == 2){
@@ -133,7 +133,7 @@ bool CheckForUser(string& name, string& password){
     string line;
     int i(0);
     while (getline(file, line)){
-        if (line.find("Name:" + name) != string::npos){
+        if (line.find("Name:" + name + ";") != string::npos){
             nameFromFile = line.erase(0,5);
             line = "";
             i = 1;
@@ -165,7 +165,7 @@ bool CheckForUser(string& name){
     string line;
 
     while (getline(file, line)){
-        if (line.find("Name:" + name) != string::npos){
+        if (line.find("Name:" + name + ";") != string::npos){
             return true;
         }
     }
@@ -182,7 +182,7 @@ void ChangeBalance(string& name, double& newBalance){
     vector<string> lines;
     while (getline(fileI, line)){
         lines.push_back(line);
-        if (line.find("Name:" + name) != string::npos){
+        if (line.find("Name:" + name + ";") != string::npos){
             lineNumber = lineCounter;
         }
         lineCounter++;
@@ -211,7 +211,7 @@ void DeleteUser(string& name){
     int counter(0);
     while (getline(fileI, line)){
         lines.push_back(line);
-        if (line.find("Name:" + name) != string::npos) userLine = counter;
+        if (line.find("Name:" + name + ";") != string::npos) userLine = counter;
         counter++;
     }
     fileI.close();
@@ -228,6 +228,7 @@ bool ValidateNewUserData(const string& name, const string& password, const doubl
     if (name.rfind("\n") != string::npos)return false;
     if (name.rfind("Name:") != string::npos)return false;
     if (name.rfind("Password:") != string::npos )return false;
+    if (name.rfind(";") != string::npos )return false;
     if (password.rfind("\n") != string::npos )return false;
     if (password.rfind("Name:") != string::npos )return false;
     if (password.rfind("Password:") != string::npos)return false;
@@ -332,9 +333,9 @@ int main(){
                         getline(cin, usernameInput);
                         cout << "\nEnter new balance: ";
                         cin >> value;
-                        cin.ignore();
                         if (CheckForUser(usernameInput)){
                             for (int i = 0; i < 3; i++){
+                                cin.ignore();
                                 cout << "\nEnter a password to change balance " << usernameInput << ": ";
                                 getline(cin, password);
                                 if (CheckForUser(name, password)){

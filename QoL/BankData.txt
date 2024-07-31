@@ -5,22 +5,26 @@
 #       Status:<status>
 #   }
 
-Name:admin
+Name:admin;
 Password:admin
 100000
 Status:admin
 
-Name:normie
+Name:normie;
 Password:normie
 0
-~Status:normie
+Status:normie
 
-Name:normie1
+Name:normie1;
 Password:normie1
 1
 Status:normie1
 
-Name:normie2
+Name:normie2;
 Password:normie2
-100
+99
 Status:normie2
+Name:Ababa;
+Password:babab
+100
+Status:normie
