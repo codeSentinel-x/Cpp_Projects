@@ -69,11 +69,10 @@ class BankAccount{
             std::ifstream file(filePath);
             if (!file) std::cerr << "Load data error: Unable to open file " << filePath << "\n";
             string line;
-            int i(0);
+            int i(-10);
             while (getline(file, line)){
                 if (line.find("Name:" +name) != string::npos){
-                    name = line.erase(0,5);
-                    line = "";
+                    name = line.erase(0, 5);
                     i = 2;
                 } else if (i == 2){
                     password = line.erase(0,9);
@@ -81,6 +80,12 @@ class BankAccount{
                 } else if (i == 1){
                     balance = std::stod(line);
                     i--;
+                } else if (i == 0){
+                    if (line.erase(0, 7) == "admin"){
+                        status = UserStatus::admin;
+                    } else{
+                        status = UserStatus::normie;
+                    }
                     break;
                 }
             }
@@ -136,6 +141,32 @@ bool CheckForUser(string& name, string& password){
         } 
     }
     cout << "Wrong username or password\n";
+    return false;
+    
+}
+void DisplayAllUsers(){
+    std::ifstream file(filePath);
+    if (!file) std::cerr << "Display all user error : Unable to open file " << filePath << "\n";
+    string line;
+    while (getline(file, line)){
+        if (line.find_first_of("#") == 0) continue;
+        if (line.find("Password:") != string::npos) continue;
+        cout << line << "\n";
+    }
+    file.close();
+}
+bool CheckForUser(string& name){
+    std::ifstream file(filePath);
+    string nameFromFile, passwordFromFile;
+    if (!file) std::cerr << "Check for user error : Unable to open file " << filePath << "\n";
+    string line;
+
+    while (getline(file, line)){
+        if (line.find("Name:" + name) != string::npos){
+            return true;
+        }
+    }
+    cout << "Username with name: " << name << " doesn't exist\n";
     return false;
     
 }
@@ -227,14 +258,15 @@ int main(){
         account = BankAccount(name, password, initialBalance);
     }
     if (account.GetStatus() == UserStatus::admin){
+        string userNameToDelete;
         do{
-            cout << "\nWhat do you want to do?"
+            cout<< "\nWhat do you want to do?"
                 << "\nW - withdraw from your account"
                 << "\nD - deposit to your account"
                 << "\nS - display your balance"
-                << "\nE - change user balance" 
+                << "\nE - display all user balances" 
                 << "\nX - delete user"
-                << "\nQ - quit";
+                << "\nQ - quit\n";
             cin >> choice;
             switch (choice){
                 case 'w':
@@ -253,10 +285,33 @@ int main(){
                 case 'S':
                     account.Display();
                     break;
+                case 'e':
+                case 'E':
+                    cout << "\n";
+                    DisplayAllUsers();
+                    break;
                 case 'x':
                 case 'X':
-                    cin.ignore();
-                    // cout << ""
+                    while (true){
+                        cin.ignore();
+                        cout << "\nEnter user name to delete: ";
+                        getline(cin, userNameToDelete);
+                        if (CheckForUser(userNameToDelete)){
+                            for (int i = 0; i < 3; i++){
+                                cout << "\nEnter a password to delete user " << userNameToDelete << ": ";
+                                getline(cin, password);
+                                if (CheckForUser(name, password)){
+                                    DeleteUser(userNameToDelete);
+                                    break;
+                                } else{
+                                    cout << "\nWrong password!";
+                                    if (i == 2) cout << "\nOperation aborted";
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }

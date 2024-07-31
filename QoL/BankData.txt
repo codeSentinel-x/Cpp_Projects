@@ -1,11 +1,26 @@
-Save data rules{
-    Name:<userName>
-    Password:<password>
-    <balance>
-    Status:<status>
-}
+#   Save data rules{
+#       Name:<userName>
+#       Password:<password>
+#       <balance>
+#       Status:<status>
+#   }
 
 Name:admin
 Password:admin
 100000
 Status:admin
+
+Name:normie
+Password:normie
+0
+~Status:normie
+
+Name:normie1
+Password:normie1
+1
+Status:normie1
+
+Name:normie2
+Password:normie2
+100
+Status:normie2
