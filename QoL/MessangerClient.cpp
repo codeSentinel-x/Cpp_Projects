@@ -37,7 +37,6 @@ int main(){
     std::string message;
     std::thread receiver(ReceiveMessage, sock);
     while (true){
-        // std::cout << "Enter message: ";
         std::getline(std::cin, message);
 
         if (message == "exit"){
