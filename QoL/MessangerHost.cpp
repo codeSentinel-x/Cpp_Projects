@@ -3,16 +3,17 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <string.h>
+#include <vector>
+#include <thread>
 
-using std::cout, std::ofstream;
+using std::cout;
+void HandleClient(int clientSocket);
 int main()
 {
     int option = 1;
     int serverFD;
-    int clientSocket;
     struct sockaddr_in address;
     int addressLength = sizeof(address);
-    char buffer[2048] = { 0 };
 
     if ((serverFD = socket(AF_INET, SOCK_STREAM, 0)) == 0){
         perror("Error while creating socket");
@@ -37,30 +38,41 @@ int main()
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    if ((clientSocket = accept(serverFD, (struct sockaddr*)&address, (socklen_t*)&addressLength)) < 0){
-        perror("accept");
-        exit(EXIT_FAILURE);
+    std::vector<std::thread> threads;
+    while (true){
+        int newSocket;
+        if ((newSocket = accept(serverFD, (struct sockaddr*)&address, (socklen_t*)&addressLength)) < 0){
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+        threads.push_back(std::thread(HandleClient, newSocket));
+
     }
 
+    close(serverFD);
+    return 0;
+}
+
+void HandleClient(int clientSocket){
+    char buffer[2048] = { 0 };
     while (true){
         memset(buffer, 0, sizeof(buffer));
         int bytes_read = read(clientSocket, buffer, sizeof(buffer));
-        if (bytes_read == 0){
-            cout << "Client disconnected" << std::endl;
+        if (bytes_read == 0) {
+            std::cout << "Client"<< clientSocket << " disconnected"  << std::endl;
             break;
         }
 
-        cout << "Client: " << buffer << std::endl;
+        std::cout << "Client: " << buffer << std::endl;
 
+        // Echo the message back to the client
         send(clientSocket, buffer, strlen(buffer), 0);
 
-        if (strcmp(buffer, "exit") == 0){
-            cout << "Exit command received. Closing connection." << std::endl;
+        // Check if the message is a command to close the connection
+        if (strcmp(buffer, "exit") == 0) {
+            std::cout << "Exit command received. Closing connection." << std::endl;
             break;
         }
     }
-
     close(clientSocket);
-    close(serverFD);
-    return 0;
 }

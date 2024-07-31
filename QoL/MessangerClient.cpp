@@ -7,7 +7,7 @@
 int main(){
 
     int sock = 0;
-    int valRead;
+    int readFromServer;
     struct sockaddr_in serverAddress;
 
     char buffer[2048] = { 0 };
@@ -42,7 +42,7 @@ int main(){
 
         send(sock, message.c_str(), message.length(), 0);
 
-        valRead = read(sock, buffer, 2048);
+        readFromServer = read(sock, buffer, 2048);
         std::cout << "Server: " << buffer << std::endl;
         memset(buffer, 0, sizeof(buffer)); // Clear the buffer
     }
