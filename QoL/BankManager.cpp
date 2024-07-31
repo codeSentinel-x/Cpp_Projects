@@ -122,6 +122,9 @@ class BankAccount{
         UserStatus GetStatus(){
             return status;
         }
+        string GetName(){
+            return name;
+        }
 };
 bool CheckForUser(string& name, string& password){
     std::ifstream file(filePath);
@@ -169,6 +172,35 @@ bool CheckForUser(string& name){
     cout << "Username with name: " << name << " doesn't exist\n";
     return false;
     
+}
+void ChangeBalance(string& name, double& newBalance){
+    std::ifstream fileI(filePath);
+    if (!fileI) std::cerr << "Change balance input file error: Unable to open file " << filePath << "\n";
+    string line;
+    int lineNumber(-1);
+    int lineCounter(0);
+    vector<string> lines;
+    while (getline(fileI, line)){
+        lines.push_back(line);
+        if (line.find("Name:" + name) != string::npos){
+            lineNumber = lineCounter;
+        }
+        lineCounter++;
+    }
+    fileI.close();
+    std::ofstream fileO(filePath);
+    if (!fileO) std::cerr << "Change balance output file error: Unable to open file " << filePath << "\n";
+    lineCounter = 0;
+    for (string l : lines){
+        if (lineCounter == lineNumber + 2){
+            fileO << newBalance << "\n";
+        } else{
+            fileO << l << "\n";
+        }
+        lineCounter++;
+    }
+    fileO.close();
+
 }
 void DeleteUser(string& name){
     std::ifstream fileI(filePath);
@@ -258,13 +290,15 @@ int main(){
         account = BankAccount(name, password, initialBalance);
     }
     if (account.GetStatus() == UserStatus::admin){
-        string userNameToDelete;
+        string usernameInput;
+        double value(0);
         do{
             cout<< "\nWhat do you want to do?"
                 << "\nW - withdraw from your account"
                 << "\nD - deposit to your account"
                 << "\nS - display your balance"
                 << "\nE - display all user balances" 
+                << "\nC - change user balance"
                 << "\nX - delete user"
                 << "\nQ - quit\n";
             cin >> choice;
@@ -290,18 +324,43 @@ int main(){
                     cout << "\n";
                     DisplayAllUsers();
                     break;
+                case 'c':
+                case 'C':
+                    while (true){
+                        cin.ignore();
+                        cout << "\nEnter name for account you want to change: ";
+                        getline(cin, usernameInput);
+                        cout << "\nEnter new balance: ";
+                        cin >> value;
+                        cin.ignore();
+                        if (CheckForUser(usernameInput)){
+                            for (int i = 0; i < 3; i++){
+                                cout << "\nEnter a password to change balance " << usernameInput << ": ";
+                                getline(cin, password);
+                                if (CheckForUser(name, password)){
+                                    ChangeBalance(usernameInput, value);
+                                    break;
+                                } else{
+                                    cout << "\nWrong password!";
+                                    if (i == 2) cout << "\nOperation aborted";
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    break;
                 case 'x':
                 case 'X':
                     while (true){
                         cin.ignore();
                         cout << "\nEnter user name to delete: ";
-                        getline(cin, userNameToDelete);
-                        if (CheckForUser(userNameToDelete)){
+                        getline(cin, usernameInput);
+                        if (CheckForUser(usernameInput)){
                             for (int i = 0; i < 3; i++){
-                                cout << "\nEnter a password to delete user " << userNameToDelete << ": ";
+                                cout << "\nEnter a password to delete user " << usernameInput << ": ";
                                 getline(cin, password);
                                 if (CheckForUser(name, password)){
-                                    DeleteUser(userNameToDelete);
+                                    DeleteUser(usernameInput);
                                     break;
                                 } else{
                                     cout << "\nWrong password!";
