@@ -1,9 +1,11 @@
-Name:Coder
-Password:Password
-190943
-Name:Bob
-Password:Password12
-65532
-Name:Mark
-Password:1234
-1000
+Save data rules{
+    Name:<userName>
+    Password:<password>
+    <balance>
+    Status:<status>
+}
+
+Name:admin
+Password:admin
+100000
+Status:admin

@@ -6,33 +6,41 @@
 using std::string, std::cout, std::cin, std::vector;
 const string filePath = "BankData.txt";
 
+enum UserStatus{
+    normie,
+    admin
+};
 class BankAccount{
 
     private:
         string name;
         string password;
         double balance;
+        UserStatus status;
+
         void WriteNewUser(){
             std::ifstream fileI(filePath);
-            if (!fileI.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+            if (!fileI) std::cerr << "Write new user input file error : Unable to open file " << filePath << "\n";
             string line;
             vector<string> lines;
             while (getline(fileI, line)) lines.push_back(line);
 
             fileI.close();
             std::ofstream fileO(filePath);
-            if (!fileI.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+            if (!fileO) std::cerr << "Write new user output file error : Unable to open file " << filePath << "\n";
             for (string l : lines) fileO << l << "\n";
             fileO << "Name:" << name << "\n";
             fileO << "Password:" << password << "\n";
             fileO << balance << "\n";
+            fileO << "Status:normie" << "\n";
+            fileO.close();
         }
         void SaveData(){
             std::ifstream fileI(filePath);
-            if (!fileI.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+            if (!fileI) std::cerr << "Save data input file error: Unable to open file " << filePath << "\n";
             string line;
-            int lineNumber = -1;
-            int lineCounter = 0;
+            int lineNumber(-1);
+            int lineCounter(0);
             vector<string> lines;
             while (getline(fileI, line)){
                 lines.push_back(line);
@@ -43,7 +51,7 @@ class BankAccount{
             }
             fileI.close();
             std::ofstream fileO(filePath);
-            if (!fileI.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+            if (!fileO) std::cerr << "Save data output file error: Unable to open file " << filePath << "\n";
             lineCounter = 0;
             for (string l : lines){
                 if (lineCounter == lineNumber + 2){
@@ -53,15 +61,15 @@ class BankAccount{
                 }
                 lineCounter++;
             }
-            
+            fileO.close();
 
 
         }
         void LoadData(){
             std::ifstream file(filePath);
-            if (!file.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+            if (!file) std::cerr << "Load data error: Unable to open file " << filePath << "\n";
             string line;
-            int i = 0;
+            int i(0);
             while (getline(file, line)){
                 if (line.find("Name:" +name) != string::npos){
                     name = line.erase(0,5);
@@ -76,6 +84,7 @@ class BankAccount{
                     break;
                 }
             }
+            file.close();
             Display();
         }
     public:
@@ -105,13 +114,16 @@ class BankAccount{
         void Display(){
             cout << "\nAccount name: " << name << "\nBalance: " << balance << "$\n";
         }
+        UserStatus GetStatus(){
+            return status;
+        }
 };
 bool CheckForUser(string& name, string& password){
     std::ifstream file(filePath);
     string nameFromFile, passwordFromFile;
-    if (!file.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+    if (!file) std::cerr << "Check for user error : Unable to open file " << filePath << "\n";
     string line;
-    int i = 0;
+    int i(0);
     while (getline(file, line)){
         if (line.find("Name:" + name) != string::npos){
             nameFromFile = line.erase(0,5);
@@ -127,7 +139,29 @@ bool CheckForUser(string& name, string& password){
     return false;
     
 }
-bool ValidateNewUserData(const string& name, const string& password, const int& balance){
+void DeleteUser(string& name){
+    std::ifstream fileI(filePath);
+    if (!fileI) std::cerr << "Delete user input file error : Enable to open file " << filePath << "\n";
+    string line;
+    vector<string> lines;
+    int userLine(-1);
+    int counter(0);
+    while (getline(fileI, line)){
+        lines.push_back(line);
+        if (line.find("Name:" + name) != string::npos) userLine = counter;
+        counter++;
+    }
+    fileI.close();
+    std::ofstream fileO(filePath);
+    if (!fileO) std::cerr << "Delete user output file error : Enable to open file " << filePath << "\n";
+    counter = 0;
+    for (string s : lines){
+        if (counter >= userLine && counter < userLine + 4) continue;
+        fileO << s << "\n";
+        counter++;
+    }
+}
+bool ValidateNewUserData(const string& name, const string& password, const double& balance){
     if (name.rfind("\n") != string::npos)return false;
     if (name.rfind("Name:") != string::npos)return false;
     if (name.rfind("Password:") != string::npos )return false;
@@ -140,7 +174,7 @@ bool ValidateNewUserData(const string& name, const string& password, const int& 
         return false;
     }
     std::ifstream file(filePath);
-    if (!file.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+    if (!file.is_open()) std::cerr << "Validate user error: Unable to open file " << filePath << "\n";
     string line;
     while (getline(file, line)){
         if (line.erase(0, 5) == name){
@@ -158,16 +192,19 @@ bool ValidateNewUserData(const string& name, const string& password, const int& 
     return true;
 }
 int main(){
-    string name;
-    string password;
-    double initialBalance;
-    char choice;
+    string name("");
+    string password("");
+    double initialBalance(0);
+    double value(0);
+    char choice(' ');
     BankAccount account;
+
     cout << "Choose option\nL - log in\nC - create account\n";
     cin >> choice;
-    cin.ignore();
+
     if (choice == 'L' || choice == 'l'){
         while (true){
+            cin.ignore();
             cout << "Enter your name: ";
             getline(cin, name);
             cout << "Enter password: ";
@@ -177,49 +214,87 @@ int main(){
         }
         account = BankAccount(name, password);
     } else{
-        do{
+        while (true){
+            cin.ignore();
             cout << "Enter your name: ";
             getline(cin, name);
             cout << "Enter your password: ";
             getline(cin, password);
             cout << "Enter your initial balance: ";
             cin >> initialBalance;
-            account = BankAccount(name,password, initialBalance);
+            if (ValidateNewUserData(name, password, initialBalance)) break;
+        }
+        account = BankAccount(name, password, initialBalance);
+    }
+    if (account.GetStatus() == UserStatus::admin){
+        do{
+            cout << "\nWhat do you want to do?"
+                << "\nW - withdraw from your account"
+                << "\nD - deposit to your account"
+                << "\nS - display your balance"
+                << "\nE - change user balance" 
+                << "\nX - delete user"
+                << "\nQ - quit";
+            cin >> choice;
+            switch (choice){
+                case 'w':
+                case 'W':
+                    cout << "\nHow much do you want to withdraw?: ";
+                    cin >> value;
+                    account.Withdraw(value);
+                    break;
+                case 'D':
+                case 'd':
+                    cout << "\nHow much do you want to deposit?: ";
+                    cin >> value;
+                    account.Deposit(value);
+                    break;
+                case 's':
+                case 'S':
+                    account.Display();
+                    break;
+                case 'x':
+                case 'X':
+                    cin.ignore();
+                    // cout << ""
+                default:
+                    break;
+            }
 
-        } while (ValidateNewUserData(name, password, initialBalance));
+        } while (choice != 'Q' && choice != 'q');
+        
+    } else{
+        do{
+            cout << "\nWhat do you want to do?"
+                << "\nW - withdraw"
+                << "\nD - deposit"
+                << "\nS - display"
+                << "\nQ - quit\n";
+            cin >> choice;
+            switch (choice){
+                case 'w':
+                case 'W':
+                    cout << "\nHow much do you want to withdraw?: ";
+                    cin >> value;
+                    account.Withdraw(value);
+                    break;
+                case 'D':
+                case 'd':
+                    cout << "\nHow much do you want to deposit?: ";
+                    cin >> value;
+                    account.Deposit(value);
+                    break;
+                case 's':
+                case 'S':
+                    account.Display();
+                    break;
+                default:
+                    break;
+            }
+
+        } while (choice != 'Q' && choice != 'q');
     }
 
-
-    double value;
-
-    do{
-        cout << "\nWhat do you want to do?"
-            << "\nW - withdraw"
-            << "\nD - deposit"
-            << "\nS - display"
-            << "\nQ - quit\n";
-        cin >> choice;
-        switch (choice){
-            case 'w':
-            case 'W':
-                cout << "\nHow much do you want to withdraw?: ";
-                cin >> value;
-                account.Withdraw(value);
-                break;
-            case 'D':
-            case 'd':
-                cout << "\nHow much do you want to deposit?: ";
-                cin >> value;
-                account.Deposit(value);
-                break;
-            case 's':
-            case 'S':
-                account.Display();
-                break;
-            default:
-                break;
-        }
-
-    } while (choice != 'Q' && choice != 'q');
     return 0;
+
 }
