@@ -127,7 +127,36 @@ bool CheckForUser(string& name, string& password){
     return false;
     
 }
-// bool ValidateUserInput(string& name, string& password)
+bool ValidateNewUserData(const string& name, const string& password, const int& balance){
+    if (name.rfind("\n") != string::npos)return false;
+    if (name.rfind("Name:") != string::npos)return false;
+    if (name.rfind("Password:") != string::npos )return false;
+    if (password.rfind("\n") != string::npos )return false;
+    if (password.rfind("Name:") != string::npos )return false;
+    if (password.rfind("Password:") != string::npos)return false;
+    if (name == " " || password == " ") return false;
+    if (name.length() < 3 || password.length() < 3){
+        cout << "Name and password must be at least 3 characters\n";
+        return false;
+    }
+    std::ifstream file(filePath);
+    if (!file.is_open()) std::cerr << "Unable to open file " << filePath << "\n";
+    string line;
+    while (getline(file, line)){
+        if (line.erase(0, 5) == name){
+            cout << "User with this name already exist\n";
+            file.close();
+            return false;
+        }
+    }
+    file.close();
+    if (balance < 0){
+        cout << "Your balance should be greater than 0\n";
+        return false;
+    }
+
+    return true;
+}
 int main(){
     string name;
     string password;
@@ -148,13 +177,16 @@ int main(){
         }
         account = BankAccount(name, password);
     } else{
-        cout << "Enter your name: ";
-        getline(cin, name);
-        cout << "Enter your password: ";
-        getline(cin, password);
-        cout << "Enter your initial balance: ";
-        cin >> initialBalance;
-        account = BankAccount(name,password, initialBalance);
+        do{
+            cout << "Enter your name: ";
+            getline(cin, name);
+            cout << "Enter your password: ";
+            getline(cin, password);
+            cout << "Enter your initial balance: ";
+            cin >> initialBalance;
+            account = BankAccount(name,password, initialBalance);
+
+        } while (ValidateNewUserData(name, password, initialBalance));
     }
 
 
