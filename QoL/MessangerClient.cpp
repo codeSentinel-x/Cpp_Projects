@@ -3,14 +3,18 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <thread>
+#include <vector>
 
+void ReceiveMessage(int sock);
 int main(){
-
     int sock = 0;
     int readFromServer;
     struct sockaddr_in serverAddress;
-
-    char buffer[2048] = { 0 };
+    std::string name;
+    std::cout << "Enter your name" << std::endl;
+    system("clear");
+    getline(std::cin, name);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
       std::cout << "\n Socket creation error \n";
@@ -31,22 +35,29 @@ int main(){
     }
 
     std::string message;
+    std::thread receiver(ReceiveMessage, sock);
     while (true){
-        std::cout << "Enter message (type 'exit' to close): ";
+        // std::cout << "Enter message: ";
         std::getline(std::cin, message);
 
-        if (message == "exit")
-        {
+        if (message == "exit"){
             break;
         }
-
+        message = name + ": " + message;
         send(sock, message.c_str(), message.length(), 0);
-
-        readFromServer = read(sock, buffer, 2048);
-        std::cout << "Server: " << buffer << std::endl;
-        memset(buffer, 0, sizeof(buffer)); // Clear the buffer
     }
-
+    receiver.detach();
     close(sock);
     return 0;
+}
+
+void ReceiveMessage(int sock){
+    char buffer[2048] = {0};
+    while (true) {
+        memset(buffer, 0, sizeof(buffer)); 
+        int valRead = read(sock, buffer, sizeof(buffer));
+        if (valRead > 0) {
+            std::cout << buffer << std::endl;
+        }
+    }
 }

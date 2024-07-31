@@ -5,11 +5,14 @@
 #include <string.h>
 #include <vector>
 #include <thread>
+#include <mutex>
 
 using std::cout;
-void HandleClient(int clientSocket);
-int main()
-{
+std::mutex mtx;
+void HandleClient(int clientSocket, std::vector<int>* allClients);
+int main(){
+    system("clear");
+    std::vector<int> allClients;
     int option = 1;
     int serverFD;
     struct sockaddr_in address;
@@ -45,15 +48,20 @@ int main()
             perror("accept");
             exit(EXIT_FAILURE);
         }
-        threads.push_back(std::thread(HandleClient, newSocket));
-
+        allClients.push_back(newSocket);
+        threads.push_back(std::thread(HandleClient, newSocket, &allClients));
     }
 
+    for (auto& th : threads) {
+            if (th.joinable()) {
+                th.join();
+            }
+        }
     close(serverFD);
     return 0;
 }
 
-void HandleClient(int clientSocket){
+void HandleClient(int clientSocket, std::vector<int>* allClients){
     char buffer[2048] = { 0 };
     while (true){
         memset(buffer, 0, sizeof(buffer));
@@ -62,13 +70,14 @@ void HandleClient(int clientSocket){
             std::cout << "Client"<< clientSocket << " disconnected"  << std::endl;
             break;
         }
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            std::cout << "Client" << clientSocket << ": " << buffer << std::endl;
+        }
+        for (int client : *allClients){
+            send(client, buffer, strlen(buffer), 0);
+        }
 
-        std::cout << "Client: " << buffer << std::endl;
-
-        // Echo the message back to the client
-        send(clientSocket, buffer, strlen(buffer), 0);
-
-        // Check if the message is a command to close the connection
         if (strcmp(buffer, "exit") == 0) {
             std::cout << "Exit command received. Closing connection." << std::endl;
             break;
