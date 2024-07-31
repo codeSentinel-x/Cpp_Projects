@@ -3,19 +3,24 @@
 #include <fstream>
 #include <vector>
 
+//I need to make some research for this one! I will be back 
 const std::string path = "Database.txt";
+std::vector<std::string> fileData;
 
-void WriteFile(std::vector<std::string> text){
+void WriteFile(){
     std::ofstream file(path);
-    if(!file.is_open) std::cerr << "Error while opening output file"
+    if (!file.is_open()) std::cerr << "Error while opening output file";
+    for (std::string s : fileData){
+        file << s << "\n";
+    }
 }
-std::vector<std::string> ReadFile(){
+void ReadFile(){
     std::ifstream file(path);
     if (!file.is_open()) std::cerr << "Error while opening input file\n";
     std::string s;
-    std::vector<std::string> result;
+    fileData.clear();
     while (getline(file, s)){
-        result.push_back(s);
+        fileData.push_back(s);
     }
 }
 void createRow(){
@@ -27,9 +32,7 @@ void createColumn(){
 void readColumn(){
 
 }
-void readRow(){
-    
-}
+
 int main(){
 
     
@@ -38,3 +41,4 @@ int main(){
 
     return 0;
 }
+

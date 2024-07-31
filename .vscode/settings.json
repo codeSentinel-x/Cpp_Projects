@@ -1,5 +1,8 @@
 {
     "cSpell.words": [
         "normie"
-    ]
+    ],
+    "files.associations": {
+        "new": "cpp"
+    }
 }
