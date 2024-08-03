@@ -8,5 +8,5 @@
     git add --all
     git commit -m "$1"
     git push -u origin master #--force 
-    echo "https://github.com/codeSentinel-x/Cpp_Projects/commit/$(git log -1 --pretty=format:"%H")"
+    echo "$(git config --get remote.origin.url | tr '.git' '/commit/')$(git log -1 --pretty=format:"%H" | grep)"
 
