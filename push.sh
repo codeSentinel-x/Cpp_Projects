@@ -8,4 +8,8 @@ fi
 git add --all
 git commit -m "$1"
 
-echo "Commit URL: $(git config --get remote.origin.url | sed 's/\.git$/\/commit\/'"$(git log -1 --pretty=format:"%H")"'/')"
+commit_url=$(git config --get remote.origin.url)
+commit_hash=$(git log -1 --pretty=format:"%H")
+commit_url="${commit_url/.git/}/commit/${commit_hash}"
+
+echo "Commit URL: $commit_url"
