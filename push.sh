@@ -9,4 +9,4 @@ git add --all
 git commit -m "$1"
 
 
-echo "Commit URL: "$(git config --get remote.origin.url)" | sed 's/\.git$/\/commit\/'"$(git log -1 --pretty=format:"%H")"'/'"
+echo "Commit URL: $(echo "$(git config --get remote.origin.url)" | sed 's/\.git$/\/commit\/'")$(git log -1 --pretty=format:"%H")"'/'"
