@@ -2,3 +2,11 @@ Name:dada;
 Password:dada
 12
 Status:normie
+Name:User1234;
+Password:User1234
+100000
+Status:normie
+Name:admin;
+Password:admin
+100000
+Status:admin
